@@ -19,6 +19,7 @@ class Stepped_API():
         self.serialPort = serialPort
         self.baudrate = baudrate
         self.offline = False
+        self.motoIsmoving = True
         self.setSerial()
 
     def setSerial(self):                            # 設定連線通道
@@ -91,6 +92,7 @@ class Stepped_API():
 
 
     def sendSerial(self, sendData, willreturn=True):
+        time.sleep(0.01)
         try:
             sendData = sendData + '\r\n'                                # 加入輸入與換行符號
             self.serial_port.write(sendData.encode('utf-8')) 
@@ -106,19 +108,54 @@ class Stepped_API():
         except Exception as e:
             print("Send erro", e)
             self.reconnect()                                    # 重啟 Serial port
-    
+
+
+    def checkMoto(self):
+        self.motoIsmoving = True
+        while self.motoIsmoving:
+            time.sleep(0.1)
+            check = self.sendSerial('r', willreturn=True)
+            print(check)
+            if check == 'L':
+                self.motoIsmoving = False
+            elif check == '.':
+                self.motoIsmoving = True
+            else:
+                print("check moto is erro!")
+                return False
+        
+
+    def setMoto(self):
+        self.sendSerial(":SI2000,4000,1000", willreturn=False)
+
 
     def motoAbsolute(self, lift, rotated):
         motoCMD = ":P" + str(lift) + "," + str(rotated) + ",0"          # 絕對座標控制(:P1000,1000,0)
-        self.sendSerial(motoCMD, willreturn=False)                      
+        self.sendSerial(motoCMD, willreturn=False)             
         # return_X, rotatedGET, liftGET = motoGET.split('\t',2)           # 以"\t"隔開
         # return rotatedGET, liftGET
     
+
     def motoRelative (self, lift, rotated):
         motoCMD = ":F" + str(lift) + "," + str(rotated) + ",0"          # 相對座標控制(:F1000,1000,0)
         self.sendSerial(motoCMD, willreturn=False)                      
         # return_X, rotatedGET, liftGET = motoGET.split('\t',2)           # 以"\t"隔開
         # return rotatedGET, liftGET
+
+
+    def motoZeroset(self):
+        self.motoRelative(1000000,-50000)
+
+        print(self.motoIsmoving)
+
+        self.checkMoto()
+        while self.motoIsmoving:
+            print(self.motoIsmoving)
+
+        if self.motoIsmoving == False:
+            self.sendSerial(":SP0,0,0", willreturn=False)
+
+
 
 if __name__ == '__main__':
     Stepped = Stepped_API(serialPort='COM2', baudrate=9600)
@@ -129,8 +166,11 @@ if __name__ == '__main__':
     returnCMD = Stepped.sendSerial(':RP')
     print(returnCMD)
 
-    # Stepped.motoRelative(-1000, 500)
-    # Stepped.motoAbsolute(-80000, 2000)
+    Stepped.motoZeroset()
+
+    returnCMD = Stepped.sendSerial(':RP')
+    print(returnCMD)
+
 
 
     
