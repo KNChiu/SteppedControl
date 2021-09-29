@@ -138,11 +138,10 @@ class Stepped_API():
         self.sendSerial(motoCMD, willreturn=False)   
         self.checkMoto()
         
-
     def motoZeroset(self):                                              # 座標歸零
         time.sleep(1)
         self.motoRelative(100000, 0)                                    # 相對座標控制(強制移動到極限位置)
-        self.motoRelative(0, -50000)                                    # 相對座標控制(強制移動到極限位置)
+        self.motoRelative(0, -500000)                                    # 相對座標控制(強制移動到極限位置)
 
         self.checkMoto()
         while self.motoIsmoving:
@@ -152,28 +151,23 @@ class Stepped_API():
             self.sendSerial(":SP0,0,0", willreturn=False)
 
 
-
 if __name__ == '__main__':
     Stepped = Stepped_API(serialPort='COM2', baudrate=9600, toolmode=False)  # 初始化(COM, baudrate, toolmode)
     print("--------------------")
-    Stepped.motoRelative(-10000, 5000)                                      # 相對座標控制
-    returnCMD = Stepped.sendSerial(':RP')
-    print(returnCMD)
+    # Stepped.motoRelative(-10000, 0)                                      # 相對座標控制
+    # returnCMD = Stepped.sendSerial(':RP')
+    # print(returnCMD)
 
+    basestepp = 12000           # 30度(1步 0.0025步)
 
+    # time.sleep(2)
 
-
-    
-    
-
-
+    for j in range(2):
+        print("==============", j, "==============")
+        Stepped.motoAbsolute(-10000, 0)
+        print("1", Stepped.sendSerial(':RP'))
+        for i in range(2, 13):
+            Stepped.motoAbsolute(0, i*basestepp-2000)
+            print(i, Stepped.sendSerial(':RP'))
+            time.sleep(2)
         
-        
-
-                
-            
-       
-
-
-
-
