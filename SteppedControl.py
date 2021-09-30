@@ -110,7 +110,7 @@ class Stepped_API():
             print("Send erro", e)
             self.reconnect()                                            # 重啟 Serial port
 
-    def checkMoto(self):                                                # 確認馬達狀態
+    def checkMoto(self):                                # 確認馬達狀態
         self.motoIsmoving = True                                        # 馬達狀態旗標
         while self.motoIsmoving:
             time.sleep(0.1)
@@ -125,23 +125,33 @@ class Stepped_API():
                 return False
         time.sleep(0.01)
         
-    def setMoto(self):                                                  # 設定馬達初始化
+    def setMoto(self):                                  # 設定馬達初始化
         self.sendSerial(":SI2000,4000,1000", willreturn=False)
 
-    def motoAbsolute(self, lift, rotated):                              # 絕對座標控制(:P1000,1000,0)
+    def motoAbsolute(self, lift, rotated):                              # 絕對座標控制(:P1000,1000,0)(步)
         motoCMD = ":P" + str(lift) + "," + str(rotated) + ",0"         
         self.sendSerial(motoCMD, willreturn=False) 
         self.checkMoto()
 
-    def motoRelative (self, lift, rotated):                             # 相對座標控制(:F1000,1000,0)
+    def motoRelative (self, lift, rotated):                             # 相對座標控制(:F1000,1000,0)(步)
         motoCMD = ":F" + str(lift) + "," + str(rotated) + ",0"          
         self.sendSerial(motoCMD, willreturn=False)   
         self.checkMoto()
-        
+
+    def lift_absolute(self, lift):                                      # 升降台絕對座標控制(:X1000)(步)
+        motoCMD = ":X" + str(lift)         
+        self.sendSerial(motoCMD, willreturn=False) 
+        self.checkMoto()
+
+    def whirl_relative (self, angle):                                   # 旋轉台相對座標控制(:V1000)(度)
+        motoCMD = ":V" + str(angle * 400)    
+        self.sendSerial(motoCMD, willreturn=False)   
+        self.checkMoto()
+ 
     def motoZeroset(self):                                              # 座標歸零
         time.sleep(1)
-        self.motoRelative(100000, 0)                                    # 相對座標控制(強制移動到極限位置)
-        self.motoRelative(0, -500000)                                    # 相對座標控制(強制移動到極限位置)
+        self.motoRelative(100000, 0)                                    # 相對座標控制(強制移動升降台到極限位置)
+        # self.motoRelative(0, -500000)                                 # 相對座標控制(強制移動旋轉台到極限位置)
 
         self.checkMoto()
         while self.motoIsmoving:
@@ -149,25 +159,33 @@ class Stepped_API():
 
         if self.motoIsmoving == False:
             self.sendSerial(":SP0,0,0", willreturn=False)
+    
+    def moto_whirl_zeroset(self):                                       # 旋轉台歸零
+        while self.motoIsmoving:
+            print(self.motoIsmoving)
+
+        if self.motoIsmoving == False:
+            self.sendSerial(":SY0", willreturn=False)
+
+    def returnCoordinate(self):                                         # 回傳座標資訊
+        return Stepped.sendSerial(':RP')
+
 
 
 if __name__ == '__main__':
     Stepped = Stepped_API(serialPort='COM2', baudrate=9600, toolmode=False)  # 初始化(COM, baudrate, toolmode)
     print("--------------------")
-    # Stepped.motoRelative(-10000, 0)                                      # 相對座標控制
-    # returnCMD = Stepped.sendSerial(':RP')
-    # print(returnCMD)
-    # time.sleep(2)
+    Stepped.lift_absolute(-10000)                           # 升降台絕對控制
+    print(Stepped.returnCoordinate())                       # 回傳座標資訊
 
-    basestepp = 12000           # 30度(1步 0.0025步)
-    
-
-    for j in range(2):
-        print("==============", j+1, "==============")
-        # Stepped.motoAbsolute(-10000, 0)
-        # print("1", Stepped.sendSerial(':RP'))
-        for i in range(0, 12):
-            Stepped.motoAbsolute(0, i*basestepp)
-            print(i+1, Stepped.sendSerial(':RP'))
+    for i in range(10):
+        print("==============", i+1, "==============")
+        Stepped.moto_whirl_zeroset()                        # 旋轉台歸零 
+        Stepped.lift_absolute(-10000*(i+1))                 # 升降台絕對座標控制(步)
+        print(Stepped.returnCoordinate())                   # 回傳座標資訊
+        for j in range(12):
+            Stepped.whirl_relative(30)                      # 旋轉台相對座標控制(度)
+            print(Stepped.returnCoordinate())               # 回傳座標資訊
             time.sleep(2)
+
         
