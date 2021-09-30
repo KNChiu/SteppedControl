@@ -8,8 +8,8 @@
 
 import time
 import serial
-import io
-import threading
+# import io
+# import threading
 
 class Stepped_API():
     def __init__(self, serialPort, baudrate, toolmode=False):
@@ -139,7 +139,7 @@ class Stepped_API():
         self.checkMoto()
 
     def lift_absolute(self, lift):                                      # 升降台絕對座標控制(:X1000)(步)
-        motoCMD = ":X" + str(lift)         
+        motoCMD = ":X" + str(-1*lift)         
         self.sendSerial(motoCMD, willreturn=False) 
         self.checkMoto()
 
@@ -168,7 +168,7 @@ class Stepped_API():
             self.sendSerial(":SY0", willreturn=False)
 
     def returnCoordinate(self):                                         # 回傳座標資訊
-        return Stepped.sendSerial(':RP')
+        return self.sendSerial(':RP')
 
 
 
