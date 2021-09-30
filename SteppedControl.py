@@ -157,17 +157,17 @@ if __name__ == '__main__':
     # Stepped.motoRelative(-10000, 0)                                      # 相對座標控制
     # returnCMD = Stepped.sendSerial(':RP')
     # print(returnCMD)
-
-    basestepp = 12000           # 30度(1步 0.0025步)
-
     # time.sleep(2)
 
+    basestepp = 12000           # 30度(1步 0.0025步)
+    
+
     for j in range(2):
-        print("==============", j, "==============")
-        Stepped.motoAbsolute(-10000, 0)
-        print("1", Stepped.sendSerial(':RP'))
-        for i in range(2, 13):
-            Stepped.motoAbsolute(0, i*basestepp-2000)
-            print(i, Stepped.sendSerial(':RP'))
+        print("==============", j+1, "==============")
+        # Stepped.motoAbsolute(-10000, 0)
+        # print("1", Stepped.sendSerial(':RP'))
+        for i in range(0, 12):
+            Stepped.motoAbsolute(0, i*basestepp)
+            print(i+1, Stepped.sendSerial(':RP'))
             time.sleep(2)
         
