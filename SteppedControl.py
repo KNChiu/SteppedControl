@@ -94,12 +94,12 @@ class Stepped_API():
         return serialData
 
     def sendSerial(self, sendData, willreturn=True):    # 傳送序列副程式
-        time.sleep(0.05)
+        time.sleep(0.1)
         try:
             sendData = sendData + '\r\n'                                # 加入輸入與換行符號
             # print(sendData.encode('utf-8'))
             self.serial_port.write(sendData.encode('utf-8')) 
-            time.sleep(0.05)
+            time.sleep(0.1)
             if willreturn:                                              # 是否回傳狀態
                 if sendData == 'r\r\n':                                 # 由於r(及時告知目前平台是否有移動)指令僅回傳1位元
                     returnCMD = self.readSerial(strChar=False)          # 讀取回應(字元模式)
