@@ -125,8 +125,9 @@ class Stepped_API():
                 return False
         time.sleep(0.01)
         
+        
     def setMoto(self):                                  # 設定馬達初始化
-        self.sendSerial(":SI2000,4000,1000", willreturn=False)
+        self.sendSerial(":SI2000,8000,400", willreturn=False)
 
     def motoAbsolute(self, lift, rotated):                              # 絕對座標控制(:P1000,1000,0)(步)
         motoCMD = ":P" + str(lift) + "," + str(rotated) + ",0"         
