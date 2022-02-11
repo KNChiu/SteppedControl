@@ -94,12 +94,12 @@ class Stepped_API():
         return serialData
 
     def sendSerial(self, sendData, willreturn=True):    # 傳送序列副程式
-        time.sleep(0.1)
+        time.sleep(0.01)
         try:
             sendData = sendData + '\r\n'                                # 加入輸入與換行符號
             # print(sendData.encode('utf-8'))
             self.serial_port.write(sendData.encode('utf-8')) 
-            time.sleep(0.1)
+            time.sleep(0.05)
             if willreturn:                                              # 是否回傳狀態
                 if sendData == 'r\r\n':                                 # 由於r(及時告知目前平台是否有移動)指令僅回傳1位元
                     returnCMD = self.readSerial(strChar=False)          # 讀取回應(字元模式)
@@ -113,9 +113,8 @@ class Stepped_API():
     def checkMoto(self):                                # 確認馬達狀態
         self.motoIsmoving = True                                        # 馬達狀態旗標
         while self.motoIsmoving:
-            time.sleep(0.1)
+            time.sleep(0.01)
             check = self.sendSerial('r', willreturn=True)
-            start = time.time()
             if check == 'L':
                 self.motoIsmoving = False
             elif check == '.':
@@ -141,7 +140,7 @@ class Stepped_API():
         self.checkMoto()
 
     def lift_absolute(self, lift):                                      # 升降台絕對座標控制(:X1000)(步)
-        motoCMD = ":X" + str(-1*lift)         
+        motoCMD = ":X" + str(lift)         
         self.sendSerial(motoCMD, willreturn=False) 
         self.checkMoto()
 
